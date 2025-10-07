@@ -1,4 +1,4 @@
-package com.example.robustfrontend.ui
+package com.example.robustfrontend.ui.dashboard
 
 import android.graphics.Color
 import android.os.Bundle
