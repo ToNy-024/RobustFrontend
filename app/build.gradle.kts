@@ -45,4 +45,31 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // ... otras dependencias (core, appcompat, etc.)
+
+    // Retrofit y GSON Converter
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    // ¡IMPORTANTE! La nueva librería para logging
+    implementation(libs.okhttp.logging.interceptor)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Lifecycle, ViewModel y LiveData
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // --- DEPENDENCIAS DE FIREBASE AÑADIDAS ---
+
+    // Importa el Bill of Materials (BoM) de Firebase.
+    // Esto asegura que las versiones de las librerías de Firebase son compatibles entre sí.
+    implementation(platform(libs.firebase.bom))
+
+    // Dependencia para Firebase Authentication
+    implementation(libs.firebase.auth)
+
+    // Dependencia para el servicio de autenticación de Google Play
+    implementation(libs.play.services.auth)
 }
