@@ -7,6 +7,10 @@ android {
     namespace = "com.example.robustfrontend"
     compileSdk = 36
 
+    buildFeatures {
+        viewBinding = true // <-- ¡AÑADE ESTA LÍNEA!
+    }
+
     defaultConfig {
         applicationId = "com.example.robustfrontend"
         minSdk = 24
@@ -72,4 +76,6 @@ dependencies {
 
     // Dependencia para el servicio de autenticación de Google Play
     implementation(libs.play.services.auth)
+
+    implementation(libs.mpandroidchart)
 }
