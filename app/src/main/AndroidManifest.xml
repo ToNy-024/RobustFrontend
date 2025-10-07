@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RobustFrontend">
         <activity
+            android:name=".ui.group.CreateGroupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.group.GroupActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
         <activity

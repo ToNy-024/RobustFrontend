@@ -1,33 +1,43 @@
 package com.example.robustfrontend.ui.dashboard
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
 import com.example.robustfrontend.databinding.ActivityDashboardBinding
+import com.example.robustfrontend.viewmodel.Dashboard.DashboardViewModel
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.auth.FirebaseAuth
 
+// TODO: Crea estas nuevas actividades vacías para que el código compile
+// import com.example.robustfrontend.ui.group.CreateGroupActivity
+// import com.example.robustfrontend.ui.group.GroupActivity
+
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var firebaseAuth: FirebaseAuth
+    // Corrección 4: La forma de instanciarlo es `viewModels()` con 's' al final
+    private val viewModel: DashboardViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Mantenemos tu configuración para la UI de borde a borde
+        enableEdgeToEdge()
 
-        // Configurar ViewBinding
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Ajustar paddings para las barras del sistema (como tenías)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -37,15 +47,20 @@ class DashboardActivity : AppCompatActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         val currentUser = firebaseAuth.currentUser
 
-        // Personalizar el saludo
-        binding.textViewWelcome.text = "¡Hola, ${currentUser?.displayName?.split(" ")?.get(0) ?: "Usuario"}!"
+        if (currentUser == null) {
+            // Si por alguna razón el usuario no está logueado, finalizar para evitar errores.
+            finish()
+            return
+        }
 
-        // Configurar el gráfico
+        binding.textViewWelcome.text = "¡Hola, ${currentUser.displayName?.split(" ")?.get(0) ?: "Usuario"}!"
+
         setupBarChart()
-        loadChartData()
-
-        // Configurar los listeners de los botones
         setupListeners()
+        setupObservers()
+
+        // Iniciar la carga de datos
+        viewModel.fetchUserActivityScores(currentUser.uid)
     }
 
     private fun setupBarChart() {
@@ -53,21 +68,20 @@ class DashboardActivity : AppCompatActivity() {
             description.isEnabled = false
             setDrawValueAboveBar(true)
             setDrawGridBackground(false)
-            // Aquí puedes añadir más configuraciones de estilo para el gráfico
             xAxis.isEnabled = false
             axisLeft.axisMinimum = 0f
             axisRight.isEnabled = false
+            legend.isEnabled = false // Ocultamos la leyenda para un look más limpio
         }
     }
 
-    private fun loadChartData() {
-        // --- DATOS DE EJEMPLO ---
-        // TODO: Reemplazar esto con una llamada a tu ViewModel/API para obtener los datos reales.
-        val entries = ArrayList<BarEntry>()
-        entries.add(BarEntry(1f, 120f)) // Puntaje Día 1
-        entries.add(BarEntry(2f, 80f))  // Puntaje Día 2
-        entries.add(BarEntry(3f, 150f)) // Puntaje Día 3
-        entries.add(BarEntry(4f, 95f))  // ... y así sucesivamente
+    private fun loadChartData(entries: List<BarEntry>) {
+        if (entries.isEmpty()) {
+            // Manejar el caso donde no hay datos, por ejemplo, mostrando un texto
+            binding.barChart.clear()
+            binding.barChart.invalidate() // Limpia y refresca el gráfico
+            return
+        }
 
         val dataSet = BarDataSet(entries, "Puntaje Diario")
         dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
@@ -76,23 +90,80 @@ class DashboardActivity : AppCompatActivity() {
 
         val barData = BarData(dataSet)
         binding.barChart.data = barData
-        binding.barChart.invalidate() // Refrescar el gráfico
+        binding.barChart.animateY(1000) // Añadimos una animación
+        binding.barChart.invalidate()
     }
 
     private fun setupListeners() {
         binding.cardViewGroup.setOnClickListener {
-            // TODO: Navegar a la actividad del grupo (GroupActivity)
-            Toast.makeText(this, "Abriendo grupo...", Toast.LENGTH_SHORT).show()
+            viewModel.onViewGroupClicked()
         }
 
         binding.buttonCreateGroup.setOnClickListener {
-            // TODO: Navegar a la actividad para crear un grupo
-            Toast.makeText(this, "Abriendo creación de grupo...", Toast.LENGTH_SHORT).show()
+            viewModel.onCreateGroupClicked()
         }
 
         binding.buttonJoinGroup.setOnClickListener {
-            // TODO: Mostrar un diálogo para introducir el código de invitación
-            Toast.makeText(this, "Abriendo diálogo para unirse...", Toast.LENGTH_SHORT).show()
+            showJoinGroupDialog()
         }
+    }
+
+    private fun setupObservers() {
+        // Observador para los datos del gráfico
+        viewModel.chartData.observe(this, Observer { entries ->
+            loadChartData(entries)
+        })
+
+        // Observador para los mensajes Toast
+        viewModel.toastMessage.observe(this, Observer { message ->
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        })
+
+        // Observadores para la navegación
+        viewModel.navigateToGroup.observe(this, Observer { navigate ->
+            if (navigate) {
+                // TODO: Descomenta esto cuando crees la GroupActivity
+                // val intent = Intent(this, GroupActivity::class.java)
+                // startActivity(intent)
+                Toast.makeText(this, "Navegando al grupo...", Toast.LENGTH_SHORT).show()
+                viewModel.onNavigationComplete() // Resetea el evento
+            }
+        })
+
+        viewModel.navigateToCreateGroup.observe(this, Observer { navigate ->
+            if (navigate) {
+                // TODO: Descomenta esto cuando crees la CreateGroupActivity
+                // val intent = Intent(this, CreateGroupActivity::class.java)
+                // startActivity(intent)
+                Toast.makeText(this, "Navegando a crear grupo...", Toast.LENGTH_SHORT).show()
+                viewModel.onNavigationComplete() // Resetea el evento
+            }
+        })
+    }
+
+    private fun showJoinGroupDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Unirse a un Grupo")
+
+        val input = EditText(this)
+        input.hint = "Introduce el código de invitación"
+        builder.setView(input)
+
+        builder.setPositiveButton("Unirse") { dialog, _ ->
+            val code = input.text.toString().trim()
+            if (code.isNotEmpty()) {
+                // TODO: Implementar la lógica para unirse al grupo con la API
+                // Por ejemplo: viewModel.joinGroup(code)
+                Toast.makeText(this, "Uniéndote al grupo con código: $code", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "El código no puede estar vacío", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Cancelar") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
     }
 }
