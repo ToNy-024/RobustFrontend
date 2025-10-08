@@ -4,6 +4,9 @@ import com.example.robustfrontend.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
+/**
+ * Interfaz que define todos los endpoints de la API del backend utilizando Retrofit.
+ */
 interface ApiService {
 
     // --- Endpoints de Actividad ---
@@ -14,7 +17,7 @@ interface ApiService {
     @GET("actividad/{idAct}")
     suspend fun getActividad(@Path("idAct") idAct: Int): Response<Actividad>
 
-    @GET("actividad/{idGru}") // Nota: Este endpoint en tu Flask parece ambiguo con el de arriba.
+    @GET("actividad/grupo/{idGru}")
     suspend fun getActividadesPorGrupo(@Path("idGru") idGru: Int): Response<List<Actividad>>
 
     @POST("actividad/")
@@ -77,7 +80,7 @@ interface ApiService {
     @GET("usuario/{idUsu}")
     suspend fun getUsuario(@Path("idUsu") idUsu: String): Response<Usuario>
 
-    @GET("usuario/{idGru}") // Nota: Este endpoint también parece ambiguo en tu Flask.
+    @GET("usuario/grupo/{idGru}") 
     suspend fun getUsuariosPorGrupo(@Path("idGru") idGru: Int): Response<List<Usuario>>
 
     @POST("usuario/")
@@ -92,6 +95,6 @@ interface ApiService {
 
     // --- Endpoint de Votación ---
 
-    @POST("actividad_usuario/votar") // Asegúrate que esta ruta sea correcta según tu configuración de Blueprints
+    @POST("actividad_usuario/votar")
     suspend fun votarActividad(@Body voto: VotoActividad): Response<Map<String, Any>>
 }

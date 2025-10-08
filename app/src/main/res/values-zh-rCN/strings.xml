@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RobustFrontend</string>
+
+    <!-- 通用 -->
+    <string name="edit">编辑</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="save_changes">保存更改</string>
+    <string name="error_generic">发生错误</string>
+    <string name="error_connection">连接错误: %1$s</string>
+    <string name="error_unauthorized_user">错误：用户未认证</string>
+    <string name="creator_prefix">由 %1$s 提出</string>
+    <string name="user_default_name">用户</string>
+
+    <!-- 登录屏幕 -->
+    <string name="login_with_google_failed">Google 登录失败。</string>
+    <string name="login_flow_cancelled">用户取消了登录流程。</string>
+    <string name="login_firebase_auth_failed">Firebase 认证失败。</string>
+    <string name="login_firebase_user_error">从 Firebase 获取用户时出错。</string>
+    <string name="login_verifying_user_error">验证用户时出错: %1$s</string>
+    <string name="login_registering_user_error">注册新用户时出错: %1$s</string>
+    <string name="login_connection_error_on_create">创建用户时连接错误: %1$s</string>
+
+    <!-- 仪表板 -->
+    <string name="dashboard_welcome">你好, %1$s!</string>
+    <string name="dashboard_load_data_error">加载数据时出错: %1$s</string>
+    <string name="bottom_nav_dashboard">仪表板</string>
+    <string name="bottom_nav_group">群组</string>
+    <string name="bottom_nav_admin">管理员</string>
+
+    <!-- 群组屏幕 -->
+    <string name="group_no_group_title">您不属于任何群组</string>
+    <string name="group_no_group_subtitle">加入一个群组或创建一个新群组以开始协作！</string>
+    <string name="group_join_button">加入群组</string>
+    <string name="group_create_new_button">创建新群组</string>
+    <string name="group_propose_activity_fab_description">提议新活动</string>
+    <string name="group_column_pending">待定</string>
+    <string name="group_column_todo">待办</string>
+    <string name="group_column_in_progress">进行中</string>
+    <string name="group_column_done">已完成</string>
+    <string name="group_join_dialog_title">加入群组</string>
+    <string name="group_join_dialog_hint">输入邀请码</string>
+    <string name="group_join_dialog_action">加入</string>
+    <string name="group_join_code_empty_error">代码不能为空</string>
+    <string name="group_delete_dialog_title">删除群组</string>
+    <string name="group_delete_dialog_message">您确定要删除此群组吗？此操作不可逆。</string>
+    <string name="group_must_belong_to_group_error">您必须属于一个群组才能提议活动。</string>
+    <string name="group_load_user_data_error">加载用户数据时出错。</string>
+    <string name="group_load_group_data_error">加载群组时出错。</string>
+    <string name="group_load_activities_error">加载群组活动时出错。</string>
+    <string name="group_join_success">您已成功加入群组！</string>
+    <string name="group_join_error">加入时出错: %1$s</string>
+    <string name="group_activity_status_updated">活动已更新</string>
+    <string name="group_activity_status_update_error">更新时出错: %1$s</string>
+    <string name="group_vote_success">投票已记录。如果票数足够，该活动将移至“待办”列表。</string>
+    <string name="group_vote_error">投票时出错: %1$s</string>
+    <string name="group_delete_success">群组已成功删除</string>
+    <string name="group_delete_error">删除群组时出错: %1$s</string>
+
+    <!-- 创建/编辑群组屏幕 -->
+    <string name="create_group_title">创建新群组</string>
+    <string name="create_group_button">创建群组</string>
+    <string name="edit_group_title">编辑群组</string>
+    <string name="create_group_name_hint">群组名称</string>
+    <string name="create_group_description_hint">描述 (目标、规则等)</string>
+    <string name="create_group_empty_error">名称和描述不能为空</string>
+    <string name="create_group_success">群组创建成功</string>
+    <string name="create_group_error">创建群组时出错: %1$s</string>
+    <string name="update_group_success">群组更新成功</string>
+    <string name="update_group_error">更新群组时出错: %1$s</string>
+    <string name="load_group_error">加载群组数据时出错: %1$s</string>
+    <string name="create_group_icon_description">群组创建图标</string>
+
+    <!-- 创建/编辑活动屏幕 -->
+    <string name="propose_activity_title">提议新活动</string>
+    <string name="propose_activity_button">提议活动</string>
+    <string name="edit_activity_title">编辑活动</string>
+    <string name="activity_name_hint">活动名称</string>
+    <string name="activity_description_hint">描述 (内容是什么？)</string>
+    <string name="activity_frequency_label">频率</string>
+    <string name="activity_difficulty_label">难度</string>
+    <string name="activity_unpleasantness_label">不愉快程度</string>
+    <string name="activity_invalid_id_error">错误：操作的 ID 无效</string>
+    <string-array name="activity_frequencies_array">
+        <item>每日</item>
+        <item>每周</item>
+        <item>每月</item>
+    </string-array>
+    <string name="load_activity_error">加载活动时出错: %1$s</string>
+    <string name="propose_activity_success">活动提议成功</string>
+    <string name="propose_activity_error">提议时出错: %1$s</string>
+    <string name="update_activity_success">活动更新成功</string>
+    <string name="update_activity_error">更新时出错: %1$s</string>
+    <string name="delete_activity_success">活动删除成功</string>
+    <string name="delete_activity_error">删除活动时出错: %1$s</string>
+    <string name="delete_activity_dialog_title">删除活动</string>
+    <string name="delete_activity_dialog_message">您确定要删除此活动吗？</string>
+
+    <!-- 管理员屏幕 -->
+    <string name="admin_user_id_error">错误：未提供用户 ID。</string>
+
+    <!-- 投票卡 -->
+    <string name="voting_card_status">票数: %1$d/%2$d</string>
+
+</resources>

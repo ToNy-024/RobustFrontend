@@ -9,14 +9,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import com.example.robustfrontend.R
 import com.example.robustfrontend.databinding.ActivityCreateGroupBinding
 import com.example.robustfrontend.viewmodel.Group.CreateGroupViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Actividad para crear un nuevo grupo o editar uno existente.
+ * El modo de operación (crear vs. editar) se determina por la presencia del EXTRA_GROUP_ID en el Intent.
+ */
 class CreateGroupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateGroupBinding
-    // ¡TODO COMPLETADO! Se instancia el ViewModel
     private val viewModel: CreateGroupViewModel by viewModels()
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private var isEditMode = false
@@ -26,6 +30,10 @@ class CreateGroupActivity : AppCompatActivity() {
         const val EXTRA_GROUP_ID = "GROUP_ID"
     }
 
+    /**
+     * Punto de entrada de la actividad. Configura la vista, determina el modo de operación
+     * y llama a las funciones de inicialización.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,47 +56,55 @@ class CreateGroupActivity : AppCompatActivity() {
         setupObservers()
     }
 
+    /**
+     * Configura los elementos de la interfaz (títulos, textos de botones) según si
+     * la pantalla está en modo de creación o edición. En modo edición, solicita la carga de datos del grupo.
+     */
     private fun setupUI() {
         if (isEditMode) {
-            binding.textViewTitle.text = "Editar Grupo"
-            binding.buttonSaveGroup.text = "Guardar Cambios"
-            // ¡TODO COMPLETADO! Cargar datos del grupo existente
+            binding.textViewTitle.text = getString(R.string.edit_group_title)
+            binding.buttonSaveGroup.text = getString(R.string.save_changes)
             groupId?.let {
                 if (it != -1) {
                     viewModel.loadGroupData(it)
                 }
             }
         } else {
-            binding.textViewTitle.text = "Crear Nuevo Grupo"
-            binding.buttonSaveGroup.text = "Crear Grupo"
+            binding.textViewTitle.text = getString(R.string.create_group_title)
+            binding.buttonSaveGroup.text = getString(R.string.create_group_button)
         }
     }
 
+    /**
+     * Configura los observadores de LiveData para reaccionar a los cambios del ViewModel.
+     * Gestiona el estado de carga, la visualización de mensajes y el llenado de datos en modo edición.
+     */
     private fun setupObservers() {
         viewModel.isLoading.observe(this, Observer { isLoading ->
             showLoading(isLoading)
         })
 
-        viewModel.toastMessage.observe(this, Observer { message ->
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        viewModel.toastMessage.observe(this, Observer { messageResId ->
+            Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
         })
 
-        // ¡TODO COMPLETADO! Observador para rellenar los campos en modo edición
         viewModel.grupo.observe(this, Observer { grupo ->
             binding.editTextGroupName.setText(grupo.nombre)
             binding.editTextGroupDescription.setText(grupo.descripcion)
         })
 
-        // ¡TODO COMPLETADO! Observador para finalizar la actividad tras una operación exitosa
         viewModel.operationComplete.observe(this, Observer { isComplete ->
             if (isComplete) {
-                // Finaliza la actividad y vuelve a la anterior
                 finish()
-                viewModel.onOperationCompleteHandled() // Resetea el evento
+                viewModel.onOperationCompleteHandled()
             }
         })
     }
 
+    /**
+     * Configura el listener del botón principal. Recoge los datos de la UI, los valida
+     * y llama a la función correspondiente del ViewModel (crear o actualizar).
+     */
     private fun setupListeners() {
         binding.buttonSaveGroup.setOnClickListener {
             val name = binding.editTextGroupName.text.toString().trim()
@@ -96,25 +112,27 @@ class CreateGroupActivity : AppCompatActivity() {
             val userId = firebaseAuth.currentUser?.uid
 
             if (name.isEmpty() || description.isEmpty()) {
-                Toast.makeText(this, "El nombre y la descripción no pueden estar vacíos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.create_group_empty_error), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (userId == null) {
-                Toast.makeText(this, "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.error_unauthorized_user), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (isEditMode) {
-                // ¡TODO COMPLETADO! Llamada para actualizar
                 groupId?.let { viewModel.updateGroup(it, name, description) }
             } else {
-                // ¡TODO COMPLETADO! Llamada para crear
                 viewModel.createGroup(name, description, userId)
             }
         }
     }
 
+    /**
+     * Muestra u oculta la barra de progreso y gestiona la interactividad del botón principal.
+     * @param isLoading True si se debe mostrar el indicador de carga, false en caso contrario.
+     */
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.buttonSaveGroup.isEnabled = !isLoading

@@ -1,10 +1,19 @@
 package com.example.robustfrontend.data.model
 
+/**
+ * Representa la instancia de una actividad completada por un usuario en una fecha específica.
+ */
 data class ActividadUsuario(
+    /** El identificador único de esta instancia de actividad completada. */
     val idActUsu: Int,
+    /** El ID de la actividad que fue completada. */
     val idAct: Int,
-    val idUsu: String, // Coincide con el tipo de dato de Usuario.idUsu
-    val fechaCompletada: String, // Puedes usar un tipo Date/LocalDate si usas un TypeConverter con GSON/Room
-    val comentario: String?, // El comentario puede ser opcional
+    /** El ID del usuario que completó la actividad. */
+    val idUsu: String,
+    /** La fecha en que la actividad fue completada. */
+    val fechaCompletada: String,
+    /** Un comentario opcional que el usuario pudo haber añadido al completar la actividad. */
+    val comentario: String?,
+    /** El puntaje que el usuario obtuvo por completar esta actividad en esta instancia. */
     val puntajeObtenido: Int
 )

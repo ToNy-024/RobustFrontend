@@ -5,159 +5,253 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
-import com.example.robustfrontend.databinding.ActivityGroupBinding
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.robustfrontend.R
+import com.example.robustfrontend.data.model.Actividad
 import com.example.robustfrontend.data.model.Grupo
+import com.example.robustfrontend.databinding.ActivityGroupBinding
+import com.example.robustfrontend.ui.activity.CreateActivityActivity
 import com.example.robustfrontend.viewmodel.Group.GroupViewModel
+import com.example.robustfrontend.viewmodel.activity.CreateActivityViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class GroupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGroupBinding
-    // ¡TODO COMPLETADO! Se instancia el ViewModel
-    private val viewModel: GroupViewModel by viewModels()
+    private val groupViewModel: GroupViewModel by viewModels()
+    private val createActivityViewModel: CreateActivityViewModel by viewModels()
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var currentGroup: Grupo? = null
 
+    private lateinit var pendingAdapter: PendingActivityAdapter
+    private lateinit var todoAdapter: ActivityAdapter
+    private lateinit var inProgressAdapter: ActivityAdapter
+    private lateinit var doneAdapter: ActivityAdapter
+
+    /**
+     * Punto de entrada de la actividad. Llama a los métodos de configuración
+     * de RecyclerViews, observadores y listeners.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         binding = ActivityGroupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
+        setupRecyclerViews()
         setupObservers()
         setupListeners()
-
-        // ¡TODO COMPLETADO! Reemplazamos la simulación con una llamada real al ViewModel
-        val userId = firebaseAuth.currentUser?.uid
-        if (userId != null) {
-            viewModel.loadUserData(userId)
-        } else {
-            // Manejar caso donde no hay usuario logueado
-            Toast.makeText(this, "Error: Usuario no autenticado.", Toast.LENGTH_LONG).show()
-            finish()
-        }
     }
 
+    /**
+     * Se llama cuando la actividad vuelve a primer plano. Recarga los datos del usuario
+     * para asegurar que la información mostrada está actualizada.
+     */
+    override fun onResume() {
+        super.onResume()
+        firebaseAuth.currentUser?.uid?.let { groupViewModel.loadUserData(it) }
+    }
+
+    /**
+     * Configura los cuatro RecyclerViews (Pendiente, Por Hacer, En Progreso, Hecho),
+     * inicializando sus adaptadores y LayoutManagers.
+     */
+    private fun setupRecyclerViews() {
+        val currentUserId = firebaseAuth.currentUser?.uid ?: ""
+        val isUserAdmin = groupViewModel.usuario.value?.esAdmin ?: false
+
+        pendingAdapter = PendingActivityAdapter(
+            onApproveClicked = { act -> firebaseAuth.currentUser?.uid?.let { uid -> groupViewModel.voteForActivity(act.idAct, uid, true) } },
+            onRejectClicked = { act -> firebaseAuth.currentUser?.uid?.let { uid -> groupViewModel.voteForActivity(act.idAct, uid, false) } }
+        )
+
+        todoAdapter = ActivityAdapter(createActivityViewModel, currentUserId, isUserAdmin)
+        inProgressAdapter = ActivityAdapter(createActivityViewModel, currentUserId, isUserAdmin)
+        doneAdapter = ActivityAdapter(createActivityViewModel, currentUserId, isUserAdmin)
+
+        binding.groupContentLayout.recyclerViewPending.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = pendingAdapter }
+        binding.groupContentLayout.recyclerViewTodo.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = todoAdapter }
+        binding.groupContentLayout.recyclerViewInProgress.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = inProgressAdapter }
+        binding.groupContentLayout.recyclerViewDone.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = doneAdapter }
+
+        setupSwipeToMove()
+    }
+
+    /**
+     * Configura los observadores de LiveData para reaccionar a los cambios en los ViewModels.
+     * Actualiza la UI cuando se cargan datos, se completan operaciones o se reciben mensajes.
+     */
     private fun setupObservers() {
-        viewModel.isLoading.observe(this, Observer { isLoading ->
-            // Puedes añadir un ProgressBar si lo deseas
+        groupViewModel.toastMessage.observe(this, Observer { messageResId ->
+            Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
+        })
+        createActivityViewModel.toastMessage.observe(this, Observer { messageResId ->
+            Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
         })
 
-        viewModel.toastMessage.observe(this, Observer { message ->
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-        })
-
-        viewModel.grupo.observe(this, Observer { grupo ->
-            currentGroup = grupo // Guardamos la referencia del grupo
+        groupViewModel.grupo.observe(this, Observer { grupo ->
             if (grupo != null) {
                 showGroupInfo(grupo)
+                setupRecyclerViews() // Recarga los adaptadores para asegurar permisos correctos
             } else {
                 showNoGroupUI()
             }
         })
 
-        viewModel.joinSuccess.observe(this, Observer { success ->
+        groupViewModel.joinSuccess.observe(this, Observer { success ->
             if (success) {
-                // Si la unión fue exitosa, recargamos los datos del usuario
-                firebaseAuth.currentUser?.uid?.let { viewModel.loadUserData(it) }
-                viewModel.onJoinSuccessComplete() // Resetea el evento
+                firebaseAuth.currentUser?.uid?.let { groupViewModel.loadUserData(it) }
+                groupViewModel.onJoinSuccessComplete()
             }
         })
 
-        // Observamos el usuario para saber si es el creador del grupo
-        viewModel.usuario.observe(this, Observer { usuario ->
-            // Actualizamos la visibilidad del botón de editar cuando tengamos ambos datos
-            updateEditButtonVisibility()
+        groupViewModel.groupDeleted.observe(this, Observer { isDeleted ->
+            if (isDeleted) {
+                firebaseAuth.currentUser?.uid?.let { groupViewModel.loadUserData(it) }
+                groupViewModel.onGroupDeletedComplete()
+            }
         })
+
+        createActivityViewModel.operationComplete.observe(this, Observer { isComplete ->
+            if (isComplete) {
+                firebaseAuth.currentUser?.uid?.let { groupViewModel.loadUserData(it) } // Recarga los datos del grupo
+                createActivityViewModel.onOperationCompleteHandled()
+            }
+        })
+
+        groupViewModel.pendingActivities.observe(this, Observer { pendingAdapter.submitList(it) })
+        groupViewModel.todoActivities.observe(this, Observer { todoAdapter.submitList(it) })
+        groupViewModel.inProgressActivities.observe(this, Observer { inProgressAdapter.submitList(it) })
+        groupViewModel.doneActivities.observe(this, Observer { doneAdapter.submitList(it) })
     }
 
+    /**
+     * Muestra la información del grupo y ajusta la visibilidad de los botones de edición/eliminación
+     * basándose en si el usuario actual es el creador del grupo.
+     * @param grupo El objeto Grupo con la información a mostrar.
+     */
     private fun showGroupInfo(grupo: Grupo) {
-        binding.cardGroupInfo.visibility = View.VISIBLE
-        binding.layoutNoGroup.visibility = View.GONE
+        binding.groupContentLayout.root.visibility = View.VISIBLE
+        binding.layoutNoGroup.root.visibility = View.GONE
+        binding.groupContentLayout.textViewGroupName.text = grupo.nombre
+        binding.groupContentLayout.textViewGroupDescription.text = grupo.descripcion
 
-        // ¡TODO COMPLETADO! Cargamos datos reales desde el ViewModel
-        binding.textViewGroupName.text = grupo.nombre
-        binding.textViewGroupDescription.text = grupo.descripcion
-        binding.textViewInvitationCode.text = "Código: ${grupo.codigoInvitacion}"
-
-        updateEditButtonVisibility()
+        val isCreator = firebaseAuth.currentUser?.uid == grupo.creador
+        binding.groupContentLayout.buttonEditGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
+        binding.groupContentLayout.buttonDeleteGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
     }
 
-    private fun updateEditButtonVisibility() {
-        val currentUser = viewModel.usuario.value
-        val currentGroup = viewModel.grupo.value
-
-        // ¡TODO COMPLETADO! Mostramos el botón solo si el ID del usuario actual es el creador del grupo
-        val isCreator = currentUser != null && currentGroup != null && currentUser.idUsu == currentGroup.creador
-        binding.buttonEditGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
-    }
-
-
+    /**
+     * Muestra la interfaz para usuarios que no pertenecen a ningún grupo, ocultando la vista principal del grupo.
+     */
     private fun showNoGroupUI() {
-        binding.cardGroupInfo.visibility = View.GONE
-        binding.layoutNoGroup.visibility = View.VISIBLE
+        binding.groupContentLayout.root.visibility = View.GONE
+        binding.layoutNoGroup.root.visibility = View.VISIBLE
     }
 
+    /**
+     * Configura los listeners para los botones de la actividad (unirse, crear, editar, eliminar grupo y proponer actividad).
+     */
     private fun setupListeners() {
-        binding.buttonJoinGroup.setOnClickListener {
-            showJoinGroupDialog()
-        }
+        binding.layoutNoGroup.buttonJoinGroup.setOnClickListener { showJoinGroupDialog() }
+        binding.layoutNoGroup.buttonNavigateToCreate.setOnClickListener { startActivity(Intent(this, CreateGroupActivity::class.java)) }
 
-        binding.buttonNavigateToCreate.setOnClickListener {
-            val intent = Intent(this, CreateGroupActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.buttonEditGroup.setOnClickListener {
-            val intent = Intent(this, CreateGroupActivity::class.java)
-            // ¡TODO COMPLETADO! Pasamos el ID del grupo para el modo edición
-            currentGroup?.let {
-                intent.putExtra(CreateGroupActivity.EXTRA_GROUP_ID, it.idGru)
+        binding.groupContentLayout.buttonEditGroup.setOnClickListener {
+            val intent = Intent(this, CreateGroupActivity::class.java).apply {
+                putExtra(CreateGroupActivity.EXTRA_GROUP_ID, groupViewModel.grupo.value?.idGru)
             }
             startActivity(intent)
         }
+
+        binding.groupContentLayout.buttonDeleteGroup.setOnClickListener { showDeleteGroupConfirmationDialog() }
+
+        binding.fabProposeActivity.setOnClickListener {
+            val groupId = groupViewModel.grupo.value?.idGru
+            val isAdmin = groupViewModel.usuario.value?.esAdmin ?: false
+            if (groupId != null) {
+                val intent = Intent(this, CreateActivityActivity::class.java).apply {
+                    putExtra(CreateActivityActivity.EXTRA_GROUP_ID, groupId)
+                    putExtra(CreateActivityActivity.EXTRA_IS_ADMIN, isAdmin)
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, getString(R.string.group_must_belong_to_group_error), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
+    /**
+     * Muestra un diálogo de confirmación antes de proceder con la eliminación de un grupo.
+     */
+    private fun showDeleteGroupConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.group_delete_dialog_title))
+            .setMessage(getString(R.string.group_delete_dialog_message))
+            .setPositiveButton(getString(R.string.delete)) { _, _ -> groupViewModel.grupo.value?.idGru?.let { groupViewModel.deleteGroup(it) } }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    /**
+     * Configura el `ItemTouchHelper` para permitir el gesto de deslizar (swipe) en las tarjetas de actividad
+     * y así cambiar su estado (ej. de "Por Hacer" a "En Progreso").
+     */
+    private fun setupSwipeToMove() {
+        val swipeCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val activity = viewHolder.itemView.tag as? Actividad ?: return
+
+                val newStatus = when (viewHolder.itemView.parent as RecyclerView) {
+                    binding.groupContentLayout.recyclerViewTodo -> if (direction == ItemTouchHelper.RIGHT) "en_progreso" else null
+                    binding.groupContentLayout.recyclerViewInProgress -> if (direction == ItemTouchHelper.RIGHT) "hecha" else "aprobada"
+                    binding.groupContentLayout.recyclerViewDone -> if (direction == ItemTouchHelper.LEFT) "en_progreso" else null
+                    else -> null
+                }
+
+                if (newStatus != null) {
+                    groupViewModel.updateActivityStatus(activity.idAct, newStatus)
+                } else {
+                    viewHolder.adapterPosition.let {
+                        if (it != RecyclerView.NO_POSITION) {
+                            (viewHolder.bindingAdapter as? ActivityAdapter)?.notifyItemChanged(it)
+                        }
+                    }
+                }
+            }
+        }
+
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewTodo)
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewInProgress)
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewDone)
+    }
+
+    /**
+     * Muestra un diálogo que permite al usuario introducir un código de invitación para unirse a un grupo.
+     */
     private fun showJoinGroupDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Unirse a un Grupo")
+        builder.setTitle(getString(R.string.group_join_dialog_title))
 
         val input = EditText(this)
-        input.hint = "Introduce el código de invitación"
+        input.hint = getString(R.string.group_join_dialog_hint)
         builder.setView(input)
 
-        builder.setPositiveButton("Unirse") { dialog, _ ->
+        builder.setPositiveButton(getString(R.string.group_join_dialog_action)) { dialog, _ ->
             val code = input.text.toString().trim()
             if (code.isNotEmpty()) {
-                // ¡TODO COMPLETADO! Implementamos la llamada al ViewModel
-                val userId = firebaseAuth.currentUser?.uid
-                if (userId != null) {
-                    viewModel.joinGroup(userId, code)
-                } else {
-                    Toast.makeText(this, "Error: Usuario no autenticado.", Toast.LENGTH_SHORT).show()
-                }
+                firebaseAuth.currentUser?.uid?.let { groupViewModel.joinGroup(it, code) }
             } else {
-                Toast.makeText(this, "El código no puede estar vacío", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.group_join_code_empty_error), Toast.LENGTH_SHORT).show()
             }
             dialog.dismiss()
         }
-        builder.setNegativeButton("Cancelar") { dialog, _ ->
-            dialog.cancel()
-        }
-
+        builder.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.cancel() }
         builder.show()
     }
 }

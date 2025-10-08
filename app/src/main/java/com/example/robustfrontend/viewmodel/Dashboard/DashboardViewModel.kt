@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.robustfrontend.R
 import com.example.robustfrontend.data.model.ActividadUsuario
 import com.example.robustfrontend.data.network.RetrofitInstance
 import com.github.mikephil.charting.data.BarEntry
@@ -12,79 +13,100 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// Data class para empaquetar los datos del gráfico
+data class ChartUiData(val entries: List<BarEntry>, val labels: List<String>)
+
 class DashboardViewModel : ViewModel() {
 
-    // LiveData para los datos del gráfico
-    private val _chartData = MutableLiveData<List<BarEntry>>()
-    val chartData: LiveData<List<BarEntry>> = _chartData
+    private val _chartData = MutableLiveData<ChartUiData>()
+    val chartData: LiveData<ChartUiData> = _chartData
 
-    // LiveData para manejar errores o mensajes
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage: LiveData<String> = _toastMessage
+    private val _toastMessage = MutableLiveData<Int>()
+    val toastMessage: LiveData<Int> = _toastMessage
 
-    // LiveData para la navegación
     private val _navigateToGroup = MutableLiveData<Boolean>()
     val navigateToGroup: LiveData<Boolean> = _navigateToGroup
 
-    private val _navigateToCreateGroup = MutableLiveData<Boolean>()
-    val navigateToCreateGroup: LiveData<Boolean> = _navigateToCreateGroup
+    private val _navigateToAdmin = MutableLiveData<Boolean>()
+    val navigateToAdmin: LiveData<Boolean> = _navigateToAdmin
 
-    // Función para obtener y procesar los datos de las actividades completadas por un usuario
+    private val _isAdmin = MutableLiveData<Boolean>()
+    val isAdmin: LiveData<Boolean> = _isAdmin
+
+    fun checkUserAdminStatus(userId: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getUsuario(userId)
+                if (response.isSuccessful) {
+                    _isAdmin.value = response.body()?.esAdmin == true
+                }
+            } catch (e: Exception) {
+                // Silently fail
+            }
+        }
+    }
+
     fun fetchUserActivityScores(userId: String) {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.getActividadesPorUsuario(userId)
                 if (response.isSuccessful && response.body() != null) {
-                    val activities = response.body()!!
-                    processActivitiesForChart(activities)
+                    processActivitiesForChart(response.body()!!)
                 } else {
-                    _toastMessage.value = "Error al cargar los datos: ${response.message()}"
+                    _toastMessage.value = R.string.dashboard_load_data_error
                 }
             } catch (e: Exception) {
-                Log.e("DashboardViewModel", "Excepción al obtener datos", e)
-                _toastMessage.value = "Error de conexión: ${e.message}"
+                Log.e("DashboardViewModel", "Error al obtener datos", e)
+                _toastMessage.value = R.string.error_connection
             }
         }
     }
 
-    // Procesa la lista de actividades y las agrupa por día para el gráfico
     private fun processActivitiesForChart(activities: List<ActividadUsuario>) {
         val dateParser = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH)
-        val dayFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dayKeyFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val displayFormatter = SimpleDateFormat("dd MMM", Locale.getDefault())
 
         val scoresByDay = activities
             .mapNotNull { activity ->
                 try {
                     val date = dateParser.parse(activity.fechaCompletada)
-                    val dayKey = dayFormatter.format(date!!)
+                    val dayKey = dayKeyFormatter.format(date!!)
                     dayKey to activity.puntajeObtenido
                 } catch (e: Exception) {
-                    null // Ignorar fechas con formato incorrecto
+                    null
                 }
             }
-            .groupBy { it.first } // Agrupar por día (ej: "2023-10-27")
-            .mapValues { entry -> entry.value.sumOf { it.second } } // Sumar los puntajes de cada día
-            .toSortedMap() // Ordenar por fecha
+            .groupBy { it.first }
+            .mapValues { entry -> entry.value.sumOf { it.second } }
+            .toSortedMap()
 
-        val chartEntries = scoresByDay.entries.mapIndexed { index, entry ->
-            BarEntry(index.toFloat(), entry.value.toFloat())
+        val labels = scoresByDay.keys.map { dateString ->
+            try {
+                val date = dayKeyFormatter.parse(dateString)
+                displayFormatter.format(date!!)
+            } catch (e: Exception) {
+                ""
+            }
         }
-        _chartData.value = chartEntries
-    }
 
-    // Funciones para manejar los eventos de clic
-    fun onViewGroupClicked() {
-        // Aquí podrías añadir lógica, como comprobar si el usuario realmente pertenece a un grupo
+        val entries = scoresByDay.values.mapIndexed {
+            index, score -> BarEntry(index.toFloat(), score.toFloat())
+        }
+        
+        _chartData.value = ChartUiData(entries, labels)
+    }
+    
+    fun onGroupNavigationSelected() {
         _navigateToGroup.value = true
     }
 
-    fun onCreateGroupClicked() {
-        _navigateToCreateGroup.value = true
+    fun onAdminNavigationSelected() {
+        _navigateToAdmin.value = true
     }
 
-    // Función para resetear el estado de navegación
     fun onNavigationComplete() {
         _navigateToGroup.value = false
-        _navigateToCreateGroup.value = false
+        _navigateToAdmin.value = false
     }
 }

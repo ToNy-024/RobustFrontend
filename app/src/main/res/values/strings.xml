@@ -1,3 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">RobustFrontend</string>
+
+    <!-- Comunes -->
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save_changes">Guardar Cambios</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+    <string name="error_connection">Error de conexión: %1$s</string>
+    <string name="error_unauthorized_user">Error: Usuario no autenticado</string>
+    <string name="creator_prefix">Propuesta por: %1$s</string>
+    <string name="user_default_name">Usuario</string>
+
+    <!-- Pantalla de Login -->
+    <string name="login_with_google_failed">Falló el inicio de sesión con Google.</string>
+    <string name="login_flow_cancelled">El usuario canceló el flujo de login.</string>
+    <string name="login_firebase_auth_failed">Falló la autenticación con Firebase.</string>
+    <string name="login_firebase_user_error">Error al obtener el usuario de Firebase.</string>
+    <string name="login_verifying_user_error">Error al verificar el usuario: %1$s</string>
+    <string name="login_registering_user_error">Error al registrar el nuevo usuario: %1$s</string>
+    <string name="login_connection_error_on_create">Error de conexión al crear el usuario: %1$s</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_welcome">¡Hola, %1$s!</string>
+    <string name="dashboard_load_data_error">Error al cargar datos: %1$s</string>
+    <string name="bottom_nav_dashboard">Dashboard</string>
+    <string name="bottom_nav_group">Grupo</string>
+    <string name="bottom_nav_admin">Admin</string>
+
+    <!-- Pantalla de Grupo -->
+    <string name="group_no_group_title">No perteneces a ningún grupo</string>
+    <string name="group_no_group_subtitle">¡Únete a un grupo o crea uno nuevo para empezar a colaborar!</string>
+    <string name="group_join_button">Unirse a un Grupo</string>
+    <string name="group_create_new_button">Crear un Grupo Nuevo</string>
+    <string name="group_propose_activity_fab_description">Proponer nueva actividad</string>
+    <string name="group_column_pending">Pendientes</string>
+    <string name="group_column_todo">Por Hacer</string>
+    <string name="group_column_in_progress">En Progreso</string>
+    <string name="group_column_done">Hecho</string>
+    <string name="group_join_dialog_title">Unirse a un Grupo</string>
+    <string name="group_join_dialog_hint">Introduce el código de invitación</string>
+    <string name="group_join_dialog_action">Unirse</string>
+    <string name="group_join_code_empty_error">El código no puede estar vacío</string>
+    <string name="group_delete_dialog_title">Eliminar Grupo</string>
+    <string name="group_delete_dialog_message">¿Estás seguro de que deseas eliminar este grupo? Esta acción es irreversible.</string>
+    <string name="group_must_belong_to_group_error">Debes pertenecer a un grupo para proponer actividades.</string>
+    <string name="group_load_user_data_error">Error al cargar datos del usuario.</string>
+    <string name="group_load_group_data_error">Error al cargar el grupo.</string>
+    <string name="group_load_activities_error">Error al cargar las actividades del grupo.</string>
+    <string name="group_join_success">¡Te has unido al grupo!</string>
+    <string name="group_join_error">Error al unirse: %1$s</string>
+    <string name="group_activity_status_updated">Actividad actualizada</string>
+    <string name="group_activity_status_update_error">Error al actualizar: %1$s</string>
+    <string name="group_vote_success">Voto registrado. La actividad pasará a &quot;Por Hacer&quot; si se alcanzan los votos necesarios.</string>
+    <string name="group_vote_error">Error al votar: %1$s</string>
+    <string name="group_delete_success">Grupo eliminado con éxito</string>
+    <string name="group_delete_error">Error al eliminar el grupo: %1$s</string>
+
+    <!-- Pantalla Crear/Editar Grupo -->
+    <string name="create_group_title">Crear Nuevo Grupo</string>
+    <string name="create_group_button">Crear Grupo</string>
+    <string name="edit_group_title">Editar Grupo</string>
+    <string name="create_group_name_hint">Nombre del grupo</string>
+    <string name="create_group_description_hint">Descripción (objetivos, reglas, etc.)</string>
+    <string name="create_group_empty_error">El nombre y la descripción no pueden estar vacíos</string>
+    <string name="create_group_success">Grupo creado con éxito</string>
+    <string name="create_group_error">Error al crear el grupo: %1$s</string>
+    <string name="update_group_success">Grupo actualizado con éxito</string>
+    <string name="update_group_error">Error al actualizar el grupo: %1$s</string>
+    <string name="load_group_error">Error al cargar datos del grupo: %1$s</string>
+    <string name="create_group_icon_description">Icono de creación de grupo</string>
+
+    <!-- Pantalla Crear/Editar Actividad -->
+    <string name="propose_activity_title">Proponer Nueva Actividad</string>
+    <string name="propose_activity_button">Proponer Actividad</string>
+    <string name="edit_activity_title">Editar Actividad</string>
+    <string name="activity_name_hint">Nombre de la Actividad</string>
+    <string name="activity_description_hint">Descripción (¿en qué consiste?)</string>
+    <string name="activity_frequency_label">Frecuencia</string>
+    <string name="activity_difficulty_label">Dificultad</string>
+    <string name="activity_unpleasantness_label">Desagrado</string>
+    <string name="activity_invalid_id_error">Error: ID no válido para la operación</string>
+    <string-array name="activity_frequencies_array">
+        <item>Diaria</item>
+        <item>Semanal</item>
+        <item>Mensual</item>
+    </string-array>
+    <string name="load_activity_error">Error al cargar la actividad: %1$s</string>
+    <string name="propose_activity_success">Actividad propuesta con éxito</string>
+    <string name="propose_activity_error">Error al proponer: %1$s</string>
+    <string name="update_activity_success">Actividad actualizada con éxito</string>
+    <string name="update_activity_error">Error al actualizar: %1$s</string>
+    <string name="delete_activity_success">Actividad eliminada con éxito</string>
+    <string name="delete_activity_error">Error al eliminar la actividad: %1$s</string>
+    <string name="delete_activity_dialog_title">Eliminar Actividad</string>
+    <string name="delete_activity_dialog_message">¿Estás seguro de que deseas eliminar esta actividad?</string>
+
+    <!-- Pantalla de Admin -->
+    <string name="admin_user_id_error">Error: No se ha proporcionado un ID de usuario.</string>
+
+    <!-- Tarjeta de Votación -->
+    <string name="voting_card_status">Votos: %1$d/%2$d</string>
+
 </resources>

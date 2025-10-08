@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RobustFrontend</string>
+
+    <!-- Common -->
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="error_generic">An error has occurred</string>
+    <string name="error_connection">Connection error: %1$s</string>
+    <string name="error_unauthorized_user">Error: User not authenticated</string>
+    <string name="creator_prefix">Proposed by: %1$s</string>
+    <string name="user_default_name">User</string>
+
+    <!-- Login Screen -->
+    <string name="login_with_google_failed">Google sign in failed.</string>
+    <string name="login_flow_cancelled">The user cancelled the login flow.</string>
+    <string name="login_firebase_auth_failed">Firebase authentication failed.</string>
+    <string name="login_firebase_user_error">Error getting user from Firebase.</string>
+    <string name="login_verifying_user_error">Error verifying user: %1$s</string>
+    <string name="login_registering_user_error">Error registering new user: %1$s</string>
+    <string name="login_connection_error_on_create">Connection error while creating user: %1$s</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_welcome">Hello, %1$s!</string>
+    <string name="dashboard_load_data_error">Error loading data: %1$s</string>
+    <string name="bottom_nav_dashboard">Dashboard</string>
+    <string name="bottom_nav_group">Group</string>
+    <string name="bottom_nav_admin">Admin</string>
+
+    <!-- Group Screen -->
+    <string name="group_no_group_title">You don\'t belong to any group</string>
+    <string name="group_no_group_subtitle">Join a group or create a new one to start collaborating!</string>
+    <string name="group_join_button">Join a Group</string>
+    <string name="group_create_new_button">Create a New Group</string>
+    <string name="group_propose_activity_fab_description">Propose new activity</string>
+    <string name="group_column_pending">Pending</string>
+    <string name="group_column_todo">To Do</string>
+    <string name="group_column_in_progress">In Progress</string>
+    <string name="group_column_done">Done</string>
+    <string name="group_join_dialog_title">Join a Group</string>
+    <string name="group_join_dialog_hint">Enter the invitation code</string>
+    <string name="group_join_dialog_action">Join</string>
+    <string name="group_join_code_empty_error">The code cannot be empty</string>
+    <string name="group_delete_dialog_title">Delete Group</string>
+    <string name="group_delete_dialog_message">Are you sure you want to delete this group? This action is irreversible.</string>
+    <string name="group_must_belong_to_group_error">You must belong to a group to propose activities.</string>
+    <string name="group_load_user_data_error">Error loading user data.</string>
+    <string name="group_load_group_data_error">Error loading group.</string>
+    <string name="group_load_activities_error">Error loading group activities.</string>
+    <string name="group_join_success">You have joined the group!</string>
+    <string name="group_join_error">Error joining: %1$s</string>
+    <string name="group_activity_status_updated">Activity updated</string>
+    <string name="group_activity_status_update_error">Error updating: %1$s</string>
+    <string name="group_vote_success">Vote registered. The activity will be moved to &quot;To Do&quot; if enough votes are cast.</string>
+    <string name="group_vote_error">Error voting: %1$s</string>
+    <string name="group_delete_success">Group deleted successfully</string>
+    <string name="group_delete_error">Error deleting group: %1$s</string>
+
+    <!-- Create/Edit Group Screen -->
+    <string name="create_group_title">Create New Group</string>
+    <string name="create_group_button">Create Group</string>
+    <string name="edit_group_title">Edit Group</string>
+    <string name="create_group_name_hint">Group name</string>
+    <string name="create_group_description_hint">Description (goals, rules, etc.)</string>
+    <string name="create_group_empty_error">Name and description cannot be empty</string>
+    <string name="create_group_success">Group created successfully</string>
+    <string name="create_group_error">Error creating group: %1$s</string>
+    <string name="update_group_success">Group updated successfully</string>
+    <string name="update_group_error">Error updating group: %1$s</string>
+    <string name="load_group_error">Error loading group data: %1$s</string>
+    <string name="create_group_icon_description">Group creation icon</string>
+
+    <!-- Create/Edit Activity Screen -->
+    <string name="propose_activity_title">Propose New Activity</string>
+    <string name="propose_activity_button">Propose Activity</string>
+    <string name="edit_activity_title">Edit Activity</string>
+    <string name="activity_name_hint">Activity Name</string>
+    <string name="activity_description_hint">Description (what is it about?)</string>
+    <string name="activity_frequency_label">Frequency</string>
+    <string name="activity_difficulty_label">Difficulty</string>
+    <string name="activity_unpleasantness_label">Unpleasantness</string>
+    <string name="activity_invalid_id_error">Error: Invalid ID for the operation</string>
+    <string-array name="activity_frequencies_array">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string name="load_activity_error">Error loading activity: %1$s</string>
+    <string name="propose_activity_success">Activity proposed successfully</string>
+    <string name="propose_activity_error">Error proposing: %1$s</string>
+    <string name="update_activity_success">Activity updated successfully</string>
+    <string name="update_activity_error">Error updating: %1$s</string>
+    <string name="delete_activity_success">Activity deleted successfully</string>
+    <string name="delete_activity_error">Error deleting activity: %1$s</string>
+    <string name="delete_activity_dialog_title">Delete Activity</string>
+    <string name="delete_activity_dialog_message">Are you sure you want to delete this activity?</string>
+
+    <!-- Admin Screen -->
+    <string name="admin_user_id_error">Error: No user ID has been provided.</string>
+
+    <!-- Voting Card -->
+    <string name="voting_card_status">Votes: %1$d/%2$d</string>
+
+</resources>

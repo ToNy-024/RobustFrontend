@@ -7,38 +7,42 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.robustfrontend.R
+import com.example.robustfrontend.ui.dashboard.DashboardActivity
 import com.example.robustfrontend.ui.login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 
 @SuppressLint("CustomSplashScreen")
+/**
+ * Actividad inicial de la aplicación. Muestra una pantalla de bienvenida durante un breve período
+ * y luego redirige al usuario a la pantalla de Login o al Dashboard principal, según si
+ * ya existe una sesión de usuario activa en Firebase.
+ */
 class SplashScreenActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
 
+    /**
+     * Punto de entrada de la actividad.
+     * Inicializa Firebase Auth y, tras una demora de 2.5 segundos, comprueba el estado
+     * de autenticación del usuario para decidir a qué pantalla navegar.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
         auth = FirebaseAuth.getInstance()
 
-        // Usamos un Handler para crear un retraso
         Handler(Looper.getMainLooper()).postDelayed({
-            // Comprobamos si ya hay un usuario logueado
             val currentUser = auth.currentUser
             if (currentUser != null) {
-                // Si hay usuario, vamos al Dashboard (o la actividad principal)
-                // Debes crear esta actividad: DashboardActivity
-                // val intent = Intent(this, DashboardActivity::class.java)
-                // startActivity(intent)
-                // Por ahora, lo mandamos al Login para seguir el flujo
-                startActivity(Intent(this, LoginActivity::class.java))
+                // Si hay un usuario, lo llevamos al Dashboard
+                startActivity(Intent(this, DashboardActivity::class.java))
             } else {
-                // Si no hay usuario, vamos a la pantalla de Login
+                // Si no, a la pantalla de Login
                 startActivity(Intent(this, LoginActivity::class.java))
             }
-
-            // Cerramos la SplashScreen para que el usuario no pueda volver a ella con el botón "atrás"
+            // Cerramos la SplashScreen para que el usuario no pueda volver a ella
             finish()
-        }, 2500) // 2500 milisegundos = 2.5 segundos
+        }, 2500)
     }
 }
