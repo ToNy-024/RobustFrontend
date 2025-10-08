@@ -1,10 +1,10 @@
-# RobustFrontend: Aplicación Android de Tareas Colaborativas
+# CleanIC: Aplicación Android de Tareas Colaborativas
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-100%25-7F52FF?style=flat-square)
 ![Arquitectura](https://img.shields.io/badge/Arquitectura-MVVM-orange?style=flat-square)
 ![CI](https://img.shields.io/badge/CI-Android%20Studio-3DDC84?style=flat-square)
 
-**RobustFrontend** es una aplicación cliente para Android que implementa un sistema de gestión de tareas y hábitos en grupo. La aplicación permite a los usuarios unirse a grupos, proponer actividades, votar por ellas de forma democrática y realizar un seguimiento de su progreso a través de un sistema de puntuación en un tablero Kanban.
+**CleanIC** es una aplicación cliente para Android que implementa un sistema de gestión de tareas y hábitos en grupo. La aplicación permite a los usuarios unirse a grupos, proponer actividades, votar por ellas de forma democrática y realizar un seguimiento de su progreso a través de un sistema de puntuación en un tablero Kanban.
 
 ## ✨ Características Principales
 
