@@ -9,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.example.robustfrontend.BuildConfig
 import com.example.robustfrontend.R
 import com.example.robustfrontend.databinding.ActivityLoginBinding
 import com.example.robustfrontend.ui.dashboard.DashboardActivity
@@ -41,8 +40,17 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val webClientId = getString(R.string.web_client_id)
+        Log.d(TAG, "WEB_CLIENT_ID from resources: '$webClientId'")
+
+        if (webClientId.isNullOrEmpty()) {
+            Log.e(TAG, "WEB_CLIENT_ID is missing! Check local.properties and your build.gradle configuration.")
+            Toast.makeText(this, "ERROR: WEB_CLIENT_ID is not configured.", Toast.LENGTH_LONG).show()
+            return 
+        }
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(BuildConfig.WEB_CLIENT_ID)
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 

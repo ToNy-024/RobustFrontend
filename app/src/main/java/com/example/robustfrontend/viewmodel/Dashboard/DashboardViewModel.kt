@@ -11,6 +11,7 @@ import com.example.robustfrontend.data.network.RetrofitInstance
 import com.github.mikephil.charting.data.BarEntry
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 // Data class para empaquetar los datos del gráfico
@@ -62,6 +63,10 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Procesa la lista de actividades para calcular el puntaje total por día y prepara los datos para el gráfico.
+     * Esta función es ahora robusta y no fallará si las fechas tienen un formato incorrecto.
+     */
     private fun processActivitiesForChart(activities: List<ActividadUsuario>) {
         val dateParser = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH)
         val dayKeyFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -70,10 +75,13 @@ class DashboardViewModel : ViewModel() {
         val scoresByDay = activities
             .mapNotNull { activity ->
                 try {
-                    val date = dateParser.parse(activity.fechaCompletada)
-                    val dayKey = dayKeyFormatter.format(date!!)
-                    dayKey to activity.puntajeObtenido
+                    // Intenta parsear la fecha de forma segura
+                    dateParser.parse(activity.fechaCompletada)?.let { date ->
+                        val dayKey = dayKeyFormatter.format(date)
+                        dayKey to activity.puntajeObtenido
+                    }
                 } catch (e: Exception) {
+                    // Si hay un error de parseo, se ignora esta actividad y se continúa con la siguiente
                     null
                 }
             }
@@ -83,8 +91,10 @@ class DashboardViewModel : ViewModel() {
 
         val labels = scoresByDay.keys.map { dateString ->
             try {
-                val date = dayKeyFormatter.parse(dateString)
-                displayFormatter.format(date!!)
+                // Convierte la clave del mapa de nuevo a fecha para formatearla de forma segura
+                dayKeyFormatter.parse(dateString)?.let { date ->
+                    displayFormatter.format(date)
+                } ?: ""
             } catch (e: Exception) {
                 ""
             }
@@ -93,10 +103,10 @@ class DashboardViewModel : ViewModel() {
         val entries = scoresByDay.values.mapIndexed {
             index, score -> BarEntry(index.toFloat(), score.toFloat())
         }
-        
+
         _chartData.value = ChartUiData(entries, labels)
     }
-    
+
     fun onGroupNavigationSelected() {
         _navigateToGroup.value = true
     }

@@ -10,7 +10,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        buildConfig = true
     }
 
     defaultConfig {
@@ -21,7 +20,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "WEB_CLIENT_ID", "\"${providers.gradleProperty("WEB_CLIENT_ID").getOrElse("\"")}\"")
+        // This is the correct and final way: create a string resource from local.properties
+        resValue("string", "web_client_id", "\"${providers.gradleProperty("WEB_CLIENT_ID").getOrElse("MISSING")}\"")
     }
 
     buildTypes {
@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.fragment.ktx) // <-- DEPENDENCIA CORREGIDA
+    implementation(libs.androidx.fragment.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
