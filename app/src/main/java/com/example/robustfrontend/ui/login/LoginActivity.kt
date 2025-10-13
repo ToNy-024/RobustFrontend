@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.example.robustfrontend.BuildConfig
 import com.example.robustfrontend.R
 import com.example.robustfrontend.databinding.ActivityLoginBinding
 import com.example.robustfrontend.ui.dashboard.DashboardActivity
@@ -41,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(BuildConfig.WEB_CLIENT_ID)
             .requestEmail()
             .build()
 

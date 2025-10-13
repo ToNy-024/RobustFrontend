@@ -48,11 +48,6 @@
             android:name=".ui.admin.EditUserActivity"
             android:exported="false" />
 
-        <!-- MainActivity ya no necesita ser exportada ni es la principal -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
     </application>
 
 </manifest>

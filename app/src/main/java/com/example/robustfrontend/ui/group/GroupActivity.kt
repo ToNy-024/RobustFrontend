@@ -73,10 +73,10 @@ class GroupActivity : AppCompatActivity() {
         inProgressAdapter = ActivityAdapter(createActivityViewModel, currentUserId, isUserAdmin)
         doneAdapter = ActivityAdapter(createActivityViewModel, currentUserId, isUserAdmin)
 
-        binding.groupContentLayout.recyclerViewPending.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = pendingAdapter }
-        binding.groupContentLayout.recyclerViewTodo.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = todoAdapter }
-        binding.groupContentLayout.recyclerViewInProgress.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = inProgressAdapter }
-        binding.groupContentLayout.recyclerViewDone.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = doneAdapter }
+        binding.recyclerViewPending.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = pendingAdapter }
+        binding.recyclerViewTodo.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = todoAdapter }
+        binding.recyclerViewInProgress.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = inProgressAdapter }
+        binding.recyclerViewDone.apply { layoutManager = LinearLayoutManager(this@GroupActivity); adapter = doneAdapter }
 
         setupSwipeToMove()
     }
@@ -135,39 +135,39 @@ class GroupActivity : AppCompatActivity() {
      * @param grupo El objeto Grupo con la información a mostrar.
      */
     private fun showGroupInfo(grupo: Grupo) {
-        binding.groupContentLayout.root.visibility = View.VISIBLE
-        binding.layoutNoGroup.root.visibility = View.GONE
-        binding.groupContentLayout.textViewGroupName.text = grupo.nombre
-        binding.groupContentLayout.textViewGroupDescription.text = grupo.descripcion
+        binding.groupContentLayout.visibility = View.VISIBLE
+        binding.layoutNoGroup.visibility = View.GONE
+        binding.textViewGroupName.text = grupo.nombre
+        binding.textViewGroupDescription.text = grupo.descripcion
 
         val isCreator = firebaseAuth.currentUser?.uid == grupo.creador
-        binding.groupContentLayout.buttonEditGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
-        binding.groupContentLayout.buttonDeleteGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
+        binding.buttonEditGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
+        binding.buttonDeleteGroup.visibility = if (isCreator) View.VISIBLE else View.GONE
     }
 
     /**
      * Muestra la interfaz para usuarios que no pertenecen a ningún grupo, ocultando la vista principal del grupo.
      */
     private fun showNoGroupUI() {
-        binding.groupContentLayout.root.visibility = View.GONE
-        binding.layoutNoGroup.root.visibility = View.VISIBLE
+        binding.groupContentLayout.visibility = View.GONE
+        binding.layoutNoGroup.visibility = View.VISIBLE
     }
 
     /**
      * Configura los listeners para los botones de la actividad (unirse, crear, editar, eliminar grupo y proponer actividad).
      */
     private fun setupListeners() {
-        binding.layoutNoGroup.buttonJoinGroup.setOnClickListener { showJoinGroupDialog() }
-        binding.layoutNoGroup.buttonNavigateToCreate.setOnClickListener { startActivity(Intent(this, CreateGroupActivity::class.java)) }
+        binding.buttonJoinGroup.setOnClickListener { showJoinGroupDialog() }
+        binding.buttonNavigateToCreate.setOnClickListener { startActivity(Intent(this, CreateGroupActivity::class.java)) }
 
-        binding.groupContentLayout.buttonEditGroup.setOnClickListener {
+        binding.buttonEditGroup.setOnClickListener {
             val intent = Intent(this, CreateGroupActivity::class.java).apply {
                 putExtra(CreateGroupActivity.EXTRA_GROUP_ID, groupViewModel.grupo.value?.idGru)
             }
             startActivity(intent)
         }
 
-        binding.groupContentLayout.buttonDeleteGroup.setOnClickListener { showDeleteGroupConfirmationDialog() }
+        binding.buttonDeleteGroup.setOnClickListener { showDeleteGroupConfirmationDialog() }
 
         binding.fabProposeActivity.setOnClickListener {
             val groupId = groupViewModel.grupo.value?.idGru
@@ -208,16 +208,16 @@ class GroupActivity : AppCompatActivity() {
                 val activity = viewHolder.itemView.tag as? Actividad ?: return
 
                 val newStatus = when (viewHolder.itemView.parent as RecyclerView) {
-                    binding.groupContentLayout.recyclerViewTodo -> if (direction == ItemTouchHelper.RIGHT) "en_progreso" else null
-                    binding.groupContentLayout.recyclerViewInProgress -> if (direction == ItemTouchHelper.RIGHT) "hecha" else "aprobada"
-                    binding.groupContentLayout.recyclerViewDone -> if (direction == ItemTouchHelper.LEFT) "en_progreso" else null
+                    binding.recyclerViewTodo -> if (direction == ItemTouchHelper.RIGHT) "en_progreso" else null
+                    binding.recyclerViewInProgress -> if (direction == ItemTouchHelper.RIGHT) "hecha" else "aprobada"
+                    binding.recyclerViewDone -> if (direction == ItemTouchHelper.LEFT) "en_progreso" else null
                     else -> null
                 }
 
                 if (newStatus != null) {
                     groupViewModel.updateActivityStatus(activity.idAct, newStatus)
                 } else {
-                    viewHolder.adapterPosition.let {
+                    viewHolder.bindingAdapterPosition.let {
                         if (it != RecyclerView.NO_POSITION) {
                             (viewHolder.bindingAdapter as? ActivityAdapter)?.notifyItemChanged(it)
                         }
@@ -226,9 +226,9 @@ class GroupActivity : AppCompatActivity() {
             }
         }
 
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewTodo)
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewInProgress)
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.groupContentLayout.recyclerViewDone)
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.recyclerViewTodo)
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.recyclerViewInProgress)
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.recyclerViewDone)
     }
 
     /**

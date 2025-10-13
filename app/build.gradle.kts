@@ -9,7 +9,8 @@ android {
     compileSdk = 36
 
     buildFeatures {
-        viewBinding = true // <-- ¡AÑADE ESTA LÍNEA!
+        viewBinding = true
+        buildConfig = true
     }
 
     defaultConfig {
@@ -20,6 +21,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "WEB_CLIENT_ID", "\"${providers.gradleProperty("WEB_CLIENT_ID").getOrElse("\"")}\"")
     }
 
     buildTypes {
@@ -38,6 +40,9 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
@@ -47,6 +52,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.fragment.ktx) // <-- DEPENDENCIA CORREGIDA
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

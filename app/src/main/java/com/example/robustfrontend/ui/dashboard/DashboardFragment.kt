@@ -1,6 +1,5 @@
 package com.example.robustfrontend.ui.dashboard
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +16,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.auth.FirebaseAuth
 
 class DashboardFragment : Fragment() {
@@ -45,7 +45,8 @@ class DashboardFragment : Fragment() {
             return
         }
 
-        binding.textViewWelcome.text = "¡Hola, ${currentUser.displayName?.split(" ")?.get(0) ?: "Usuario"}!"
+        val welcomeMessage = getString(R.string.dashboard_welcome, currentUser.displayName?.split(" ")?.get(0) ?: getString(R.string.user_default_name))
+        binding.textViewWelcome.text = welcomeMessage
 
         setupBarChart()
         setupObservers()

@@ -14,7 +14,7 @@ object RetrofitInstance {
 
     // La URL base del backend. "10.0.2.2" es la IP especial para acceder al localhost
     // de la máquina anfitriona desde el emulador de Android.
-    private const val BASE_URL = "http://10.0.2.2:5000/"
+    private const val BASE_URL = "https://robustbackend-p8z8.onrender.com/"
 
     /**
      * Crea un interceptor que registra en el Logcat los detalles de las peticiones
